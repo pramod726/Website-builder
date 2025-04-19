@@ -14,7 +14,7 @@ function SignUpLogin() {
     password: '',
   });
 
-  // axios.defaults.withCredentials = true;
+  axios.defaults.withCredentials = true;
   const navigate = useNavigate();
 
   const handleChange = (event) => {
@@ -58,7 +58,7 @@ function SignUpLogin() {
 
     try {
       const endpoint = action === "Sign Up" ? "api/user/signUp" : "api/user/logIn";
-      const response = await axios.post(`https://localhost:8000/${endpoint}`, formData);
+      const response = await axios.post(`http://localhost:8000/${endpoint}`, formData);
       if (response.data.success || action === "Sign Up") {
         navigate(response.data.path);
       } else {
@@ -66,7 +66,7 @@ function SignUpLogin() {
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Something went wrong");
+      alert(error.response.data.message);
     }
   };
 
