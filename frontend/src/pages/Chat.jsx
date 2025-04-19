@@ -19,9 +19,10 @@ function Chat() {
 
   const { prompt } = location.state || {};
   // Chat state
-  const [messages, setMessages] = useState([
-    { sender: "bot", text: "Hello! How can I help you today?" }
-  ]);
+  const initialMessages = prompt
+  ? [{sender:"user",text:prompt}]
+  : [{sender:"bot", text:"Hello! How can I help you today"}]
+  const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState(prompt || ""); 
 
   const [showPreview, setShowPreview] = useState(false);
@@ -32,11 +33,26 @@ function Chat() {
     try {       
       const response = await axios.post("http://localhost:8000/api/prompt", {
         prompt: input})
+        setInput("");
         console.log("Fetched data:", response);
       const data = await response.data;
       setFiles(data);
     } catch (error) {
       console.error("Error fetching prompt:", error);
+    }
+  };
+
+  const modifyPrompt = async (input) => {
+    console.log("Modifying code with instruction:", input);
+    try {
+      const response = await axios.post("http://localhost:8000/api/modify", {
+        existingCode: files,   // sending the current files JSON
+        instruction: input
+      });
+      console.log("Modification result:", response);
+      setFiles(response.data);  // assuming the server returns updated files
+    } catch (error) {
+      console.error("Error modifying prompt:", error);
     }
   };
 
@@ -67,6 +83,7 @@ function Chat() {
 
   const handleSend = () => {
     if (input.trim()) {
+      modifyPrompt(input);
       setMessages([...messages, { sender: "user", text: input }]);
       setTimeout(() => {
         setMessages(prev => [

@@ -211,7 +211,7 @@ async function executeModifyTask(taskId, existingCode, instruction) {
 
     while (true) {
         const result = await client.executions.get(execution.id);
-        console.log(result.output);
+        // console.log(result.output);
         if (result.status === "succeeded" || result.status === "failed") {
             if (result.status === "succeeded") {
                 const parsedFiles = parseCodeBlock(result.output);
