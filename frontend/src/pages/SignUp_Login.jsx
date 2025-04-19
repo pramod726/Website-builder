@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import "../stylesheets/SignUp_Login.css";
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import toast from "react-hot-toast"
+
+// import '../stylesheet/SignUp_Login.css'
 
 const backend_url = import.meta.env.VITE_BACKEND_URL;
 
@@ -22,12 +24,6 @@ export default function SignUpLogin() {
     setFormData((p) => ({ ...p, [name]: value }));
   };
 
-  const validateEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const validatePassword = (pw) =>
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(pw);
-
   const validateForm = () => {
     if (action === "Sign Up") {
       if (!validateEmail(formData.email)) {
@@ -35,36 +31,52 @@ export default function SignUpLogin() {
         return false;
       }
       if (!validatePassword(formData.password)) {
-        alert(
-          "Password must be ≥8 chars, include upper, lower, number & special char."
-        );
+        toast.error("Password must be ≥8 chars, include upper, lower, number & special char.")
         return false;
       }
     }
     return true;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
-    try {
-      const endpoint =
-        action === "Sign Up" ? "api/user/signUp" : "api/user/logIn";
-      const { data } = await axios.post(
-        `${backend_url}/${endpoint}`,
-        formData
-      );
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
 
-      if (data.success || action === "Sign Up") {
-        navigate(data.path || "/dashboard");
-      } else {
-        alert(data.message || "Login failed");
-      }
-    } catch (err) {
-      console.error(err);
-      alert(err?.response?.data?.message || "Server error");
-    }
+  const handleSubmit = async (event) => {
+      event.preventDefault();
+      if (!validateForm()) return;
+  
+      try {
+        const endpoint = action === "Sign Up" ? "api/user/signUp" : "api/user/logIn";
+        const response = await axios.post(`http://localhost:8000/${endpoint}`, formData, {
+          withCredentials: true, // Important to allow cookies
+        });
+    
+        if (response.data.success) {
+          // Save token & user info in localStorage
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+    
+          // Navigate to dashboard/homepage
+          toast.success(response.data.message || "Login successful");
+          navigate("/dashboard");
+        } else {
+          toast.error(response.data.message || "Login failed");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error(error.response?.data?.message);
+      }    
+  };
+
+  const handleClick = () => {
+    setAction((prev) => (prev === "Sign Up" ? "Log In" : "Sign Up"));
   };
 
   return (
@@ -87,15 +99,16 @@ export default function SignUpLogin() {
           {action === "Sign Up" && (
             <>
               <div className="sinput">
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <input
+              type="text"
+              name="username"
+              className="sinput_style"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+          </div>
               <div className="sinput">
                 <input
                   type="text"
@@ -109,16 +122,17 @@ export default function SignUpLogin() {
             </>
           )}
 
-          <div className="sinput">
-            <input
-              type="text"
-              name="username"
-              placeholder="Username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-          </div>
+<div className="sinput">
+                <input
+                  type="email"
+                  name="email"
+                  className="sinput_style"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
           <div className="sinput">
             <input

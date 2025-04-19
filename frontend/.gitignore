@@ -1,4 +1,5 @@
 .env
+frontend/.vite-cache
 # Logs
 logs
 *.log
