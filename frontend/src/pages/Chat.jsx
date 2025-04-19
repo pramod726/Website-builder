@@ -34,20 +34,32 @@ function Chat() {
   }, []);
 
   return (
-    <div className="flex h-screen w-screen">
-      <div className="w-1/2 bg-gray-900 text-blue-400 flex justify-center items-center text-2xl">
+    <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
+      <div style={{ width: "50%", background: "#20232a", color: "#61dafb", display: "flex", justifyContent: "center", alignItems: "center", fontSize: "24px" }}>
         Left Side Content
       </div>
 
-      <div className="w-1/2 h-full">
+      {/* Right Side Sandpack */}
+      <div style={{ width: "50%", position: "relative" }}>
         <button
           onClick={() => setShowPreview(!showPreview)}
-          className="absolute top-2.5 right-2.5 z-50 px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 transition"
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            zIndex: 999,
+            padding: "8px 16px",
+            background: "#8a2be2",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+          }}
         >
           {showPreview ? "Show Code" : "Show Preview"}
         </button>
 
-        <SandpackProvider className="h-full"
+        <SandpackProvider
           theme={amethyst}
           template="react"
           customSetup={{
@@ -69,22 +81,22 @@ function Chat() {
             externalResources: ["https://cdn.tailwindcss.com"],
           }}
         >
-          <SandpackLayout className="flex-grow h-full text-sm">
+          <SandpackLayout style={{ height: "100vh", fontSize: "14px" }}>
             {showPreview ? (
               <SandpackPreview
                 showNavigator={true}
                 showOpenInCodeSandbox={false}
-                className="flex-grow h-full"
+                style={{ flexGrow: 1, height: "100%" }}
               />
             ) : (
               <>
-                <SandpackFileExplorer className="flex-grow h-full" />
+                <SandpackFileExplorer style={{ height: "100%" }} />
                 <SandpackCodeEditor
                   showTabs
                   showLineNumbers={true}
                   showInlineErrors
                   closableTabs
-                  className="flex-grow h-full"
+                  style={{ height: "100%" }}
                 />
               </>
             )}
@@ -92,6 +104,7 @@ function Chat() {
         </SandpackProvider>
       </div>
     </div>
+
   );
 }
 
