@@ -4,37 +4,40 @@ import {
   SandpackLayout,
   SandpackFileExplorer,
   SandpackCodeEditor,
-  SandpackPreview
+  SandpackPreview,
 } from "@codesandbox/sandpack-react";
 import { amethyst } from "@codesandbox/sandpack-themes";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
+import { ScaleLoader } from 'react-spinners';
 
 function Chat() {
   const [leftWidth, setLeftWidth] = useState(300);
   const resizerRef = useRef(null);
   const containerRef = useRef(null);
-  const [isResizing, setIsResizing] = useState(false)
+  const [isResizing, setIsResizing] = useState(false);
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
 
   const { prompt } = location.state || {};
   // Chat state
   const initialMessages = prompt
-  ? [{sender:"user",text:prompt}]
-  : [{sender:"bot", text:"Hello! How can I help you today"}]
+    ? [{ sender: "user", text: prompt }]
+    : [{ sender: "bot", text: "Hello! How can I help you today" }];
   const [messages, setMessages] = useState(initialMessages);
-  const [input, setInput] = useState(prompt || ""); 
+  const [input, setInput] = useState(prompt || "");
 
   const [showPreview, setShowPreview] = useState(false);
   const [files, setFiles] = useState([]);
 
   const fetchPrompt = async () => {
-    console.log("Fetching prompt...",input);
-    try {       
+    console.log("Fetching prompt...", input);
+    try {
       const response = await axios.post("http://localhost:8000/api/prompt", {
-        prompt: input})
-        setInput("");
-        console.log("Fetched data:", response);
+        prompt: input,
+      });
+      setInput("");
+      console.log("Fetched data:", response);
       const data = await response.data;
       setFiles(data);
     } catch (error) {
@@ -44,13 +47,15 @@ function Chat() {
 
   const modifyPrompt = async (input) => {
     console.log("Modifying code with instruction:", input);
+    setLoading(false);
     try {
       const response = await axios.post("http://localhost:8000/api/modify", {
-        existingCode: files,   // sending the current files JSON
-        instruction: input
+        existingCode: files, // sending the current files JSON
+        instruction: input,
       });
       console.log("Modification result:", response);
-      setFiles(response.data);  // assuming the server returns updated files
+      setLoading(true);
+      setFiles(response.data); // assuming the server returns updated files
     } catch (error) {
       console.error("Error modifying prompt:", error);
     }
@@ -64,7 +69,8 @@ function Chat() {
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (isResizing && containerRef.current) {
-        const newWidth = e.clientX - containerRef.current.getBoundingClientRect().left;
+        const newWidth =
+          e.clientX - containerRef.current.getBoundingClientRect().left;
         if (newWidth > 200 && newWidth < 600) {
           setLeftWidth(newWidth);
         }
@@ -86,9 +92,9 @@ function Chat() {
       modifyPrompt(input);
       setMessages([...messages, { sender: "user", text: input }]);
       setTimeout(() => {
-        setMessages(prev => [
+        setMessages((prev) => [
           ...prev,
-          { sender: "bot", text: "Working on your request..." }
+          { sender: "bot", text: "Working on your request..." },
         ]);
       }, 1000);
       setInput("");
@@ -98,18 +104,25 @@ function Chat() {
   return (
     <div
       ref={containerRef}
-      style={{ display: "flex", height: "100vh", width: "100vw", overflow: "hidden" }}
+      style={{
+        display: "flex",
+        height: "100vh",
+        width: "100vw",
+        overflow: "hidden",
+      }}
     >
       {/* Left Chat Panel */}
-      <div style={{
-        width: leftWidth,
-        background: "#1e1e1e",
-        color: "white",
-        display: "flex",
-        flexDirection: "column",
-        padding: "16px",
-        overflowY: "auto"
-      }}>
+      <div
+        style={{
+          width: leftWidth,
+          background: "#1e1e1e",
+          color: "white",
+          display: "flex",
+          flexDirection: "column",
+          padding: "16px",
+          overflowY: "auto",
+        }}
+      >
         <div style={{ flex: 1, overflowY: "auto", marginBottom: "12px" }}>
           {messages.map((msg, i) => (
             <div
@@ -121,7 +134,7 @@ function Chat() {
                 margin: "6px 0",
                 borderRadius: "12px",
                 alignSelf: msg.sender === "bot" ? "flex-start" : "flex-end",
-                maxWidth: "75%"
+                maxWidth: "75%",
               }}
             >
               {msg.text}
@@ -140,7 +153,7 @@ function Chat() {
               borderRadius: "8px",
               border: "1px solid #555",
               background: "#2c2c2c",
-              color: "white"
+              color: "white",
             }}
           />
           <button
@@ -152,7 +165,7 @@ function Chat() {
               borderRadius: "8px",
               background: "#7e22ce",
               color: "white",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             Send
@@ -168,7 +181,7 @@ function Chat() {
           width: "5px",
           cursor: "col-resize",
           background: "#555",
-          zIndex: 10
+          zIndex: 10,
         }}
       />
 
@@ -192,49 +205,57 @@ function Chat() {
           {showPreview ? "Show Code" : "Show Preview"}
         </button>
 
-        <SandpackProvider
-          theme={amethyst}
-          template="react"
-          customSetup={{
-            entry: "/src/index.js"
-          }}
-          files={
-            files.length > 0
-              ? files.reduce((acc, file) => {
-                  acc[file.filepath] = file.code;
-                  return acc;
-                }, {})
-              : {
-                  "/App.js": `export default function Example() { return <div>Hello World!</div>; }`
-                }
-          }
-          options={{
-            visibleFiles: files.length > 0 ? files.map(file => file.filepath) : ["/App.js"],
-            activeFile: files.length > 0 ? files[0].filepath : "/App.js",
-            externalResources: ["https://cdn.tailwindcss.com"],
-          }}
-        >
-          <SandpackLayout style={{ height: "100vh", fontSize: "14px" }}>
-            {showPreview ? (
-              <SandpackPreview
-                showNavigator
-                showOpenInCodeSandbox={false}
-                style={{ flexGrow: 1, height: "100%" }}
-              />
-            ) : (
-              <>
-                <SandpackFileExplorer style={{ height: "100%" }} />
-                <SandpackCodeEditor
-                  showTabs
-                  showLineNumbers
-                  showInlineErrors
-                  closableTabs
-                  style={{ height: "100%" }}
+        {(files.length > 0 && loading) ? (
+          <SandpackProvider
+            theme={amethyst}
+            template="react"
+            customSetup={{
+              entry: "/src/index.js",
+            }}
+            files={files.reduce((acc, file) => {
+              acc[file.filepath] = file.code;
+              return acc;
+            }, {})}
+            options={{
+              visibleFiles: files.map((file) => file.filepath),
+              activeFile: files[0].filepath,
+              externalResources: ["https://cdn.tailwindcss.com"],
+            }}
+          >
+            <SandpackLayout style={{ height: "100vh", fontSize: "14px" }}>
+              {showPreview ? (
+                <SandpackPreview
+                  showNavigator
+                  showOpenInCodeSandbox={false}
+                  style={{ flexGrow: 1, height: "100%" }}
                 />
-              </>
-            )}
-          </SandpackLayout>
-        </SandpackProvider>
+              ) : (
+                <>
+                  <SandpackFileExplorer style={{ height: "100%" }} />
+                  <SandpackCodeEditor
+                    showTabs
+                    showLineNumbers
+                    showInlineErrors
+                    closableTabs
+                    style={{ height: "100%" }}
+                  />
+                </>
+              )}
+            </SandpackLayout>
+          </SandpackProvider>
+        ) : (
+          <div
+            style={{
+              height: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              background: "#1e1e1e",
+            }}
+          >
+            <ScaleLoader color="#7e22ce" />
+          </div>
+        )}
       </div>
     </div>
   );
