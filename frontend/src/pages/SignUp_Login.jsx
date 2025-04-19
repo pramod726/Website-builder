@@ -16,7 +16,7 @@ function SignUpLogin() {
     password: '',
   });
 
-  // axios.defaults.withCredentials = true;
+  axios.defaults.withCredentials = true;
   const navigate = useNavigate();
 
   const handleChange = (event) => {
