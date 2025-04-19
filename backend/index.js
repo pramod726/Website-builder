@@ -18,12 +18,14 @@ const router = require('./routes/route');
 
 app.use("/api", router);
 
-app.listen(PORT, () => {
-    console.log(`Server successfully started at ${PORT}`);
-});
 
 dbconnect();
 
 app.use("/", (req, res) => {
     res.send('<h1> This is homepage baby</h1>');
+});
+
+
+app.listen(PORT, () => {
+    console.log(`Server successfully started at ${PORT}`);
 });
