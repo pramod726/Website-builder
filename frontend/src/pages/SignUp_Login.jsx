@@ -97,16 +97,16 @@ function SignUpLogin() {
           {action === "Sign Up" && (
             <>
               <div className="sinput">
-                <input
-                  type="email"
-                  name="email"
-                  className="sinput_style"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <input
+              type="text"
+              name="username"
+              className="sinput_style"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+          </div>
               <div className="sinput">
                 <input
                   type="text"
@@ -121,17 +121,17 @@ function SignUpLogin() {
             </>
           )}
 
-          <div className="sinput">
-            <input
-              type="text"
-              name="username"
-              className="sinput_style"
-              placeholder="Username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-          </div>
+<div className="sinput">
+                <input
+                  type="email"
+                  name="email"
+                  className="sinput_style"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
           <div className="sinput">
             <input
