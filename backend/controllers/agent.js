@@ -110,7 +110,7 @@ async function executeTask(taskId, content) {
 
 exports.prompt = async (req, res) => {
     try {
-        const content = "A creative website of website-builder with earth 3d animation";
+        const content = req.body.prompt || "Create a website for a restaurant that serves Italian food.";
         console.log("api called ");
         const agentId = await createAgent();
         const taskId = await createTask(agentId);
