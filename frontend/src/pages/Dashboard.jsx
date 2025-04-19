@@ -160,14 +160,22 @@ export default function Dashboard() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-100 text-gray-600 px-6 py-4 text-sm mt-auto flex justify-between items-center">
-        <span>&copy; 2025 ProjectPress. All rights reserved.</span>
-        <div className="flex gap-4">
-          <a href="#" className="hover:underline">Privacy</a>
-          <a href="#" className="hover:underline">Terms</a>
-          <a href="#" className="hover:underline">Support</a>
-        </div>
-      </footer>
+      <footer className="bg-gray-300 text-black px-6 py-6 text-sm mt-auto flex flex-col md:flex-row items-center justify-between">
+  <span>&copy; 2025 ProjectPress. All rights reserved.</span>
+  <div className="flex items-center gap-2 mt-2 md:mt-0">
+    <span>Made with</span>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-4 w-4 text-red-500 animate-pulse"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
+    </svg>
+    <span>by Team ByteMe</span>
+  </div>
+</footer>
     </div>
   );
 }
