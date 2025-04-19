@@ -1,23 +1,23 @@
-import React, { useEffect } from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom'
-import HomePage from './pages/HomePage'
-import Dashboard from './pages/Dashboard'
-import SignUpLogin from './pages/SignUp_Login'
-import ProtectedRoute from './components/ProtectedRoute'
-import './stylesheets/SignUp_Login.css'
-import Chat from './pages/Chat'
-import { Toaster } from 'react-hot-toast'
+import React, { useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import Dashboard from './pages/Dashboard';
+import SignUpLogin from './pages/SignUp_Login';
+import ProtectedRoute from './components/ProtectedRoute';
+import Chat from './pages/Chat';
+import { Toaster } from 'react-hot-toast';
+import './stylesheets/SignUp_Login.css';
 
 function App() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    const path = window.location.pathname
-    if (token && (path === "/" || path === "/auth")) {
-      navigate("/dashboard")
+    const token = localStorage.getItem('token');
+    const path = window.location.pathname;
+    if (token && (path === '/' || path === '/auth')) {
+      navigate('/dashboard');
     }
-  }, [])
+  }, []);
 
   return (
     <>
@@ -25,15 +25,18 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/auth" element={<SignUpLogin />} />
-      <Route path="/chat" element={<Chat/>} />
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
+        <Route path="/chat" element={<Chat />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
