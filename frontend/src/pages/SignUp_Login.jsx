@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import toast from "react-hot-toast"
+
 // import '../stylesheet/SignUp_Login.css'
 
 const backend_url = import.meta.env.VITE_BACKEND_URL;
@@ -53,21 +55,30 @@ function SignUpLogin() {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!validateForm()) return;
-
-    try {
-      const endpoint = action === "Sign Up" ? "api/user/signUp" : "api/user/logIn";
-      const response = await axios.post(`https://localhost:8000/${endpoint}`, formData);
-      if (response.data.success || action === "Sign Up") {
-        navigate(response.data.path);
-      } else {
-        alert(response.data.message || "Login failed");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Something went wrong");
-    }
+      event.preventDefault();
+      if (!validateForm()) return;
+  
+      try {
+        const endpoint = action === "Sign Up" ? "api/user/signUp" : "api/user/logIn";
+        const response = await axios.post(`http://localhost:8000/${endpoint}`, formData, {
+          withCredentials: true, // Important to allow cookies
+        });
+    
+        if (response.data.success) {
+          // Save token & user info in localStorage
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+    
+          // Navigate to dashboard/homepage
+          toast.success(response.data.message || "Login successful");
+          navigate("/dashboard");
+        } else {
+          toast.error(response.data.message || "Login failed");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error(response.data.message);
+      }    
   };
 
   const handleClick = () => {
