@@ -1,168 +1,122 @@
-/* default styling property for the layout. */
-
-*{ 
-    padding: 0px;
-    margin: 0px;
-    box-sizing: border-box;
+/* full‐screen gradient backdrop */
+.sbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #3a2bea, #7e1aed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
 }
 
-/* styles for the background */
-
-.sbox{
-    display:flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #2c2c2c;
-    height: 100vh;
-    width: 100%;   
+/* modal container */
+.scontainer {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  padding: 2rem;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  color: #fff;
 }
 
-/* styles for the container of signUp logIn page */
-
-.scontainer{
-    background-color:  #ffffff;
-    min-height:70%;
-    max-width: 400px;
-    display:flex;
-    flex-direction: column;
-    align-items: center;
-    border-radius:10px;
-    border:1px solid black;
-    box-shadow: 2px 2px 15px   #ffffff;
-    padding:10px;
+/* close button */
+.closeBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #fff;
+  cursor: pointer;
 }
 
-/* style for the heading of registration part */
-
-.sheader{
-    margin:20px auto 0px auto;   
+/* header */
+.sheader {
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
-.stext{
-    font-size: 2.7rem;
-    font-weight: 700;
-    margin: 8px;
-    color:black;   
+.stext {
+  font-size: 2rem;
+  margin: 0;
 }
-.sunderline{
-    width:80px;
-    background-color: black;
-    border-radius: 3px;
-    height: 5px;
-    margin: auto;
+.sunderline {
+  width: 60px;
+  height: 4px;
+  background: #fff;
+  margin: 0.5rem auto 0;
+  border-radius: 2px;
 }
 
-/* styles for the 3 input section in the form. */
-
-.sinput{
-    margin-top:25px;
+/* inputs */
+.sinput {
+  margin-bottom: 1rem;
 }
-.sinput_style{
-    height:35px;
-    width:280px;
-    padding:20px;
-    border-radius: 7px;
-    border:1px solid rgb(161, 159, 159);
-    font-size: 16px;
-    background-color: #faf8f8;
-    color:#797979;
-}
-.lostpassword{
-    font-size:15px;
-    font-weight:400;
-    color:#797979;
-    padding:10px;  
-}
-.lostpassword>span{
-    font-weight:600;
+.sinput input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+  color: #000;
 }
 
-/* style for the submit button */
-
-.signSubmit{
-    width:280px;
-    height:40px;
-    border-radius: 5px;
-    border: 0px solid black;
-    background-color: #4caf50;
-    color:white;
-    font-size: 16px;
-    padding:7px;
-    margin:20px;
-    cursor:pointer;
+/* lost password link */
+.lostpassword {
+  text-align: right;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
 }
-.logSubmit{
-    width:280px;
-    height:40px;
-    border-radius: 5px;
-    border: 0px solid black;
-    background-color: #4caf50;
-    color:white;
-    font-size: 16px;
-    padding:7px;
-    margin:10px;  
-    cursor:pointer;
+.lostpassword a {
+  color: #ffd700;
+  text-decoration: none;
 }
 
-/*pseudo class application for the undelrine effect in the page  */
+/* submit buttons */
+.signSubmit,
+.logSubmit {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(102, 51, 153, 0.6);
+}
+.signSubmit {
+  background: #fff;
+  color: #7e1aed;
+}
+.logSubmit {
+  background: #fff;
+  color: #3a2bea;
+}
 
-.pseudoClass {
-    display: grid;
-    grid-template-columns: 4.2fr 1fr 4.2fr;
-    align-items: center;
-    font-size:1.4rem ;
-    /* margin:10px; */
-    font-weight: 400;
-  }
-  /* applying pseudo class for cretion that text inbetween effect in the scetion. */
-  .pseudoClass::before,
-  .pseudoClass::after {
-    content: "";
-    height: 2px;
-    background-color: rgb(16, 16, 16);
-    display: block;
-  }
-  .or{
-    padding:5px;
-    font-size: 1.3rem;
-  }
+/* “or” separator */
+.or {
+  text-align: center;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
 
-   /* style for google authetication button */
-   
-  .google-auth-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    background-color: #4285F4; 
-    color: #ffffff; 
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-  }
-  
-  .google-auth-button:hover {
-    background-color: #357ae8; 
-  }
-  
-  .google-logo {
-    width: 20px; 
-    margin-right: 10px; }
-
-    .google-cont{
-      width:90%;
-      margin:5px;
-    }
-
-    /* styles for have account section. */ 
-
-  .haveAccount{
-    margin:20px;
-    margin-top:10px;
-  }
-  .haveAccount>span{
-    font-weight: 500;
-    cursor: pointer;
-    color: #3498db;
-    
-  }
+/* switch action */
+.haveAccount {
+  text-align: center;
+  font-size: 0.9rem;
+}
+.haveAccount span {
+  margin-left: 0.25rem;
+  color: #ffd700;
+  cursor: pointer;
+}
