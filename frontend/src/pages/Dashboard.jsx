@@ -51,7 +51,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     try {
-      const res = await axios.post('http://localhost:8000/api/logOut', { _id: user.id });
+      const res = await axios.post('http://localhost:8000/api/user/logOut', { _id: user.id });
       if (res.data.success) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
