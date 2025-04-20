@@ -144,7 +144,7 @@ async function createModifierAgent() {
 
 const modifyTaskYaml = `
 name: React Code Modifier Task
-description: Modify existing React code based on user instructions.
+description: Modify existing React code based on user instructions, with error handling.
 input_schema:
   type: object
   properties:
@@ -157,7 +157,7 @@ input_schema:
 
 main:
   - prompt: |-
-      $ f"""You are a senior frontend developer. Based on the following existing code and modification instruction:
+      $ f"""You are a senior frontend developer. You will receive a JSON array representing an entire React project (all files and their contents) and a modification instruction.
 
       Existing Code:
       {steps[0].input.existing_code}
@@ -165,16 +165,19 @@ main:
       Modification Instruction:
       {steps[0].input.modification_instruction}
 
-      Please apply the changes cleanly while following best practices:
-
+      Requirements:
+      - Apply only the minimal changes needed; preserve all unaffected files and overall project structure.
       - Use modern React with functional components.
-      - Preserve the code structure unless the instruction demands otherwise.
-      - Output a JSON array. Each item must be:
-      {{ "filename": "example filename with extension", "filepath": "full relative or absolute path to the file", "code": "the full code content as a string" }}
-      - Make sure the response is valid JSON with no explanations or markdown.
+      - Ensure no essential files are removed.
+      - If the instruction is invalid or the modification cannot be applied, return a JSON object:
+        {{ "error": "A clear description of why the change failed" }}
+      - Otherwise, return a JSON array of **all** project files (changed and unchanged). Each item must be:
+        {{ "filename": "file name with extension", "filepath": "relative file path", "code": "full file contents as a string" }}
+      - The response must be valid JSON only, with no additional text or markdown fences.
       """
     unwrap: true
 `;
+
 
 async function createModifyTask(agentId) {
     try {
