@@ -22,12 +22,12 @@
 ---
 
 ## 📽 Demo Video:
-<a href="video link">Watch Demo</a>
+<a href="https://drive.google.com/file/d/1AInIAXuPqFkDDkijFwRhlmqZ2AtewW0Y/view?usp=sharing">Watch Demo</a>
 
 ---
 
 ## 📊 Presentation:
-<a href="ppt link">View PPT</a>
+<a href="https://docs.google.com/presentation/d/155LRehp363Efe8md6wjVtS6zHPvSlUah/edit?usp=drive_link&ouid=100438880337564441851&rtpof=true&sd=true">View PPT</a>
 
 ---
 
