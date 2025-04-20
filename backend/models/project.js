@@ -10,9 +10,9 @@ const InteractionSchema = new Schema({
 
 // Simple file snapshot representing current UI code state
 const FileSchema = new Schema({
-  name: { type: String, required: true }, // e.g., "App.tsx"
-  type: { type: String, required: true }, // e.g., "tsx", "css"
-  content: { type: String, required: true }, // latest generated code
+  filename: { type: String, required: true }, 
+  filepath: { type: String, required: true }, 
+  code: { type: String, required: true },
   updatedAt: { type: Date, default: Date.now }
 }, { _id: false });
 

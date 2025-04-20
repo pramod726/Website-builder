@@ -12,8 +12,8 @@ router.post("/user/logIn", userlogin);
 router.post("/user/logOut", auth, logout);
 
 // agent interaction handling and response generation routes
-router.post("/prompt", prompt);
-router.post("/modify", modify);
+router.post("/prompt",auth, prompt);
+router.post("/modify/:projectId", auth, modify);
 
 // project related routes
 router.post("/projects", auth, createProject);

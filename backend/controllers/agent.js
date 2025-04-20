@@ -308,13 +308,15 @@ exports.modify = async (req, res) => {
     console.log("[modify] Project modification request received");
     console.log("[modify] Request body:", {
         instructionPreview: req.body.instruction?.substring(0, 50) + "...",
-        projectId: req.body.projectId,
+        projectId: req.params.projectId,
         userId: req.body._id,
         existingCodeCount: req.body.existingCode?.length || 0
     });
     
     try {
-        const { existingCode, instruction, projectId } = req.body;
+        const { existingCode, instruction } = req.body;
+        const projectId = req.params.projectId;
+        console.log("[modify] Project ID:", projectId);
         
         // Validate required parameters
         if (!existingCode || !Array.isArray(existingCode) || existingCode.length === 0) {
@@ -354,6 +356,7 @@ exports.modify = async (req, res) => {
         console.log(`[modify] Task executed, received ${updatedFiles.length} updated files`);
 
         // Always save modifications to project
+        // console.log(req.body);
         if (req.body._id) {
             console.log("[modify] Saving modifications to project:", projectId);
             try {
@@ -384,14 +387,20 @@ exports.modify = async (req, res) => {
                     
                     // Update files with the new versions
                     project.files = updatedFiles.map(file => ({
-                        name: file.filename,
-                        type: file.filepath.split('.').pop(),
-                        content: file.code,
+                        filename: file.filename,
+                        filepath: file.filepath,
+                        code: file.code,
                         updatedAt: new Date()
                     }));
                     
                     await project.save();
                     console.log("[modify] Project updated with modified files");
+
+                    return res.status(200).json({
+                        success: true,
+                        message: "Project updated successfully",
+                        data: project
+                    });
                 } else {
                     console.error("[modify] Project not found or not owned by user");
                     return res.status(404).json({

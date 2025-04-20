@@ -19,7 +19,7 @@ function Chat() {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
 
-  const { prompt } = location.state || {};
+  let { prompt, projectId } = location.state || {};
   // Chat state
   const initialMessages = prompt
     ? [{ sender: "user", text: prompt }]
@@ -37,6 +37,7 @@ function Chat() {
         prompt: input,
       });
       setInput("");
+      prompt = "";
       console.log("Fetched data:", response);
       const data = await response.data;
       setFiles(data);
@@ -49,20 +50,23 @@ function Chat() {
     console.log("Modifying code with instruction:", input);
     setLoading(false);
     try {
-      const response = await axios.post("http://localhost:8000/api/modify", {
+      const response = await axios.post(`http://localhost:8000/api/modify/${projectId}`, {
         existingCode: files, // sending the current files JSON
         instruction: input,
       });
-      console.log("Modification result:", response);
+      console.log("Modification result:", response.data);
       setLoading(true);
-      setFiles(response.data); // assuming the server returns updated files
+      setFiles(response.data.data.files); // assuming the server returns updated files
+      setMessages(response.data.data.interactions); // assuming the server returns updated interactions
     } catch (error) {
       console.error("Error modifying prompt:", error);
     }
   };
 
   useEffect(() => {
-    fetchPrompt();
+    if(input){
+      fetchPrompt();
+    }
   }, []);
 
   // Resizing
@@ -128,16 +132,16 @@ function Chat() {
             <div
               key={i}
               style={{
-                background: msg.sender === "bot" ? "#333" : "#7e22ce",
+                background: msg.role === "assistant" ? "#333" : "#7e22ce",
                 color: "white",
                 padding: "10px 14px",
                 margin: "6px 0",
                 borderRadius: "12px",
-                alignSelf: msg.sender === "bot" ? "flex-start" : "flex-end",
+                alignSelf: msg.sender === "assistant" ? "flex-start" : "flex-end",
                 maxWidth: "75%",
               }}
             >
-              {msg.text}
+              {msg.message}
             </div>
           ))}
         </div>
@@ -205,7 +209,7 @@ function Chat() {
           {showPreview ? "Show Code" : "Show Preview"}
         </button>
 
-        {(files.length > 0 && loading) ? (
+        {(files && files.length > 0 && loading) ? (
           <SandpackProvider
             theme={amethyst}
             template="react"
