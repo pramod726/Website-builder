@@ -1,6 +1,7 @@
 const dotenv = require("dotenv");
 const Julep = require("@julep/sdk");
 const yaml = require("yaml");
+dotenv.config();
 
 const client = new Julep({ apiKey: process.env.JULEP_API_KEY });
 
@@ -108,21 +109,6 @@ async function executeTask(taskId, content) {
     }
 }
 
-exports.prompt = async (req, res) => {
-    try {
-        const content = req.body.prompt || "Create a website for a restaurant that serves Italian food.";
-        console.log("api called ");
-        const agentId = await createAgent();
-        const taskId = await createTask(agentId);
-        const parsedFiles = await executeTask(taskId, content);
-        console.log("output sent");
-        res.json(parsedFiles);
-    } catch (error) {
-        console.error("Error in /prompt:", error);
-        res.status(500).json({ error: error.message });
-    }
-};
-
 
 async function createModifierAgent() {
     try {
@@ -227,19 +213,262 @@ async function executeModifyTask(taskId, existingCode, instruction) {
     }
 }
 
-exports.modify = async (req, res) => {
+/**
+ * Handles initial prompt for a new project
+ * This function should be called only when starting a new project
+ */
+exports.prompt = async (req, res) => {
+    console.log("[prompt] Initial project generation request received");
+    console.log("[prompt] Request body:", {
+        promptPreview: req.body.prompt?.substring(0, 50) + "...",
+        projectId: req.body.projectId,
+        userId: req.body._id
+    });
+    
     try {
-        const { existingCode, instruction } = req.body;
-        console.log("Modification API called");
-
-        const agentId = await createModifierAgent();
-        const taskId = await createModifyTask(agentId);
-        const updatedFiles = await executeModifyTask(taskId, existingCode, instruction);
-
-        console.log("Modified code sent");
-        res.json(updatedFiles);
+        const content = req.body.prompt || "Create a website for a restaurant that serves Italian food.";
+        const projectId = req.body.projectId;
+        console.log("[prompt] Processing initial prompt: " + content.substring(0, 50) + "...");
+        
+        const agentId = await createAgent();
+        console.log("[prompt] Agent created with ID:", agentId);
+        
+        const taskId = await createTask(agentId);
+        console.log("[prompt] Task created with ID:", taskId);
+        
+        const parsedFiles = await executeTask(taskId, content);
+        console.log(`[prompt] Task executed, received ${parsedFiles.length} files`);
+        
+        // Always save to project if it exists (this should be the first interaction)
+        if (projectId && req.body._id) {
+            console.log("[prompt] Saving initial files to project:", projectId);
+            try {
+                const Project = require('../models/Project');
+                
+                // Find the project
+                const project = await Project.findOne({
+                    _id: projectId,
+                    userId: req.body._id
+                });
+                
+                if (project) {
+                    console.log("[prompt] Project found, updating with initial content");
+                    
+                    // Add initial user prompt
+                    project.interactions.push({
+                        role: 'user',
+                        message: content,
+                        timestamp: new Date()
+                    });
+                    
+                    // Add AI response
+                    project.interactions.push({
+                        role: 'assistant',
+                        message: 'Generated initial website code based on your prompt.',
+                        timestamp: new Date()
+                    });
+                    
+                    // Update files
+                    project.files = parsedFiles.map(file => ({
+                        name: file.filename,
+                        type: file.filepath.split('.').pop(),
+                        content: file.code,
+                        updatedAt: new Date()
+                    }));
+                    
+                    // Update project status
+                    project.status = 'active';
+                    
+                    await project.save();
+                    console.log("[prompt] Project updated with initial files");
+                } else {
+                    console.log("[prompt] Project not found or not owned by user");
+                }
+            } catch (dbError) {
+                console.error("[prompt] Error saving to database:", dbError);
+                // Continue even if DB save fails
+            }
+        } else {
+            console.log("[prompt] No project ID or user ID provided, returning files without saving");
+        }
+        
+        console.log("[prompt] Sending initial files to client");
+        res.json(parsedFiles);
     } catch (error) {
-        console.error("Error in /modify:", error);
-        res.status(500).json({ error: error.message });
+        console.error("[prompt] Error processing initial request:", error);
+        res.status(500).json({ 
+            success: false,
+            error: error.message 
+        });
     }
 };
+
+/**
+ * Handles all subsequent interactions with an existing project
+ * This function should be called for all interactions after the initial prompt
+ */
+exports.modify = async (req, res) => {
+    console.log("[modify] Project modification request received");
+    console.log("[modify] Request body:", {
+        instructionPreview: req.body.instruction?.substring(0, 50) + "...",
+        projectId: req.body.projectId,
+        userId: req.body._id,
+        existingCodeCount: req.body.existingCode?.length || 0
+    });
+    
+    try {
+        const { existingCode, instruction, projectId } = req.body;
+        
+        // Validate required parameters
+        if (!existingCode || !Array.isArray(existingCode) || existingCode.length === 0) {
+            console.error("[modify] Missing or invalid existingCode parameter");
+            return res.status(400).json({
+                success: false,
+                message: "Missing or invalid existingCode parameter"
+            });
+        }
+        
+        if (!instruction || typeof instruction !== 'string') {
+            console.error("[modify] Missing or invalid instruction parameter");
+            return res.status(400).json({
+                success: false,
+                message: "Missing or invalid instruction parameter"
+            });
+        }
+        
+        if (!projectId) {
+            console.error("[modify] Missing projectId parameter");
+            return res.status(400).json({
+                success: false,
+                message: "Missing projectId parameter"
+            });
+        }
+        
+        console.log("[modify] Processing modification instruction: " + instruction.substring(0, 50) + "...");
+        console.log("[modify] Existing files count:", existingCode.length);
+
+        const agentId = await createModifierAgent();
+        console.log("[modify] Modifier agent created with ID:", agentId);
+        
+        const taskId = await createModifyTask(agentId);
+        console.log("[modify] Modify task created with ID:", taskId);
+        
+        const updatedFiles = await executeModifyTask(taskId, existingCode, instruction);
+        console.log(`[modify] Task executed, received ${updatedFiles.length} updated files`);
+
+        // Always save modifications to project
+        if (req.body._id) {
+            console.log("[modify] Saving modifications to project:", projectId);
+            try {
+                const Project = require('../models/Project');
+                
+                // Find the project
+                const project = await Project.findOne({
+                    _id: projectId,
+                    userId: req.body._id
+                });
+                
+                if (project) {
+                    console.log("[modify] Project found, updating with modified content");
+                    
+                    // Add user instruction
+                    project.interactions.push({
+                        role: 'user',
+                        message: instruction,
+                        timestamp: new Date()
+                    });
+                    
+                    // Add AI response
+                    project.interactions.push({
+                        role: 'assistant',
+                        message: 'Modified website code based on your instruction.',
+                        timestamp: new Date()
+                    });
+                    
+                    // Update files with the new versions
+                    project.files = updatedFiles.map(file => ({
+                        name: file.filename,
+                        type: file.filepath.split('.').pop(),
+                        content: file.code,
+                        updatedAt: new Date()
+                    }));
+                    
+                    await project.save();
+                    console.log("[modify] Project updated with modified files");
+                } else {
+                    console.error("[modify] Project not found or not owned by user");
+                    return res.status(404).json({
+                        success: false,
+                        message: "Project not found or not owned by current user"
+                    });
+                }
+            } catch (dbError) {
+                console.error("[modify] Error saving to database:", dbError);
+                // Don't fail the request if DB save fails
+            }
+        } else {
+            console.error("[modify] No user ID provided in request");
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required"
+            });
+        }
+
+        console.log("[modify] Sending modified files to client");
+        res.json(updatedFiles);
+    } catch (error) {
+        console.error("[modify] Error processing modification:", error);
+        res.status(500).json({ 
+            success: false,
+            error: error.message 
+        });
+    }
+};
+
+/**
+ * Utility function to handle saving project interactions
+ * This can be called from both prompt and modify functions
+ * @param {Object} project - The project document from MongoDB
+ * @param {String} userMessage - The message from the user
+ * @param {String} assistantMessage - The response message from the assistant
+ * @param {Array} files - The files to save to the project
+ */
+async function saveProjectInteraction(project, userMessage, assistantMessage, files) {
+    if (!project) return;
+    
+    console.log("[saveProjectInteraction] Saving interaction to project:", project._id);
+    
+    // Add user message
+    if (userMessage) {
+        project.interactions.push({
+            role: 'user',
+            message: userMessage,
+            timestamp: new Date()
+        });
+    }
+    
+    // Add assistant response
+    if (assistantMessage) {
+        project.interactions.push({
+            role: 'assistant',
+            message: assistantMessage,
+            timestamp: new Date()
+        });
+    }
+    
+    // Update files if provided
+    if (files && Array.isArray(files)) {
+        console.log(`[saveProjectInteraction] Updating ${files.length} files`);
+        
+        project.files = files.map(file => ({
+            name: file.filename,
+            type: file.filepath.split('.').pop(),
+            content: file.code,
+            updatedAt: new Date()
+        }));
+    }
+    
+    // Save the changes
+    await project.save();
+    console.log("[saveProjectInteraction] Project updated successfully");
+}
