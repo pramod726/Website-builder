@@ -243,7 +243,7 @@ exports.prompt = async (req, res) => {
         if (projectId && req.body._id) {
             console.log("[prompt] Saving initial files to project:", projectId);
             try {
-                const Project = require('../models/Project');
+                const Project = require('../models/project');
                 
                 // Find the project
                 const project = await Project.findOne({
@@ -369,7 +369,7 @@ exports.modify = async (req, res) => {
         if (req.body._id) {
             console.log("[modify] Saving modifications to project:", projectId);
             try {
-                const Project = require('../models/Project');
+                const Project = require('../models/project');
                 
                 // Find the project
                 const project = await Project.findOne({

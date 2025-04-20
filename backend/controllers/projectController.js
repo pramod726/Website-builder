@@ -1,5 +1,5 @@
 // controllers/project.js
-const Project = require('../models/Project');
+const Project = require('../models/project');
 const User = require('../models/user');
 const mongoose = require('mongoose');
 

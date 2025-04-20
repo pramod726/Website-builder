@@ -18,6 +18,8 @@ function Chat() {
   const [isResizing, setIsResizing] = useState(false);
   const location = useLocation();
   const [loading, setLoading] = useState(true);
+  const messagesEndRef = useRef(null);
+
 
   const { projectId } = location.state || {};
   // Chat state
@@ -61,6 +63,11 @@ function Chat() {
   useEffect(() => {
     fetchProject();  
   }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+  
 
   // Resizing
   useEffect(() => {
@@ -137,6 +144,7 @@ function Chat() {
               {msg.message}
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
         <div style={{ display: "flex" }}>
           <input
