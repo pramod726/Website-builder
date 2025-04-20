@@ -18,13 +18,7 @@ exports.createProject = async (req, res) => {
       userId,
       title: title || 'Untitled UI Project',
       status: 'active',
-      interactions: initialPrompt ? [
-        {
-          role: 'user',
-          message: initialPrompt,
-          timestamp: new Date()
-        }
-      ] : [],
+      interactions: [],
       files: []
     });
 
@@ -100,7 +94,8 @@ exports.getProjectById = async (req, res) => {
       console.log("[getProjectById] Project not found or not owned by user");
       return res.status(404).json({
         success: false,
-        message: "Project not found"
+        message: "Project not found",
+        data: project
       });
     }
 

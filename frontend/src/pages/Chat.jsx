@@ -19,32 +19,14 @@ function Chat() {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
 
-  let { prompt, projectId } = location.state || {};
+  const { projectId } = location.state || {};
   // Chat state
-  const initialMessages = prompt
-    ? [{ sender: "user", text: prompt }]
-    : [{ sender: "bot", text: "Hello! How can I help you today" }];
-  const [messages, setMessages] = useState(initialMessages);
-  const [input, setInput] = useState(prompt || "");
-
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [files, setFiles] = useState([]);
 
-  const fetchPrompt = async () => {
-    console.log("Fetching prompt...", input);
-    try {
-      const response = await axios.post("http://localhost:8000/api/prompt", {
-        prompt: input,
-      });
-      setInput("");
-      prompt = "";
-      console.log("Fetched data:", response);
-      const data = await response.data;
-      setFiles(data);
-    } catch (error) {
-      console.error("Error fetching prompt:", error);
-    }
-  };
+  
 
   const modifyPrompt = async (input) => {
     console.log("Modifying code with instruction:", input);
@@ -63,10 +45,21 @@ function Chat() {
     }
   };
 
-  useEffect(() => {
-    if(input){
-      fetchPrompt();
+  const fetchProject = async () => {
+    console.log("Fetching project...");
+    try {
+      const response = await axios.get(`http://localhost:8000/api/projects/${projectId}`);
+      console.log("Fetching project: ", response.data);
+      setLoading(true);
+      setFiles(response.data.project.files); // assuming the server returns updated files
+      setMessages(response.data.project.interactions); // assuming the server returns updated interactions
+    } catch (error) {
+      console.error("Error fetching prompt:", error);
     }
+  };
+
+  useEffect(() => {
+    fetchProject();  
   }, []);
 
   // Resizing

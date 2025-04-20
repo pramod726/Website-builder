@@ -33,9 +33,9 @@ export default function Dashboard() {
       setUser(userObj);
       console.log('User data:', userObj);
       // Fetch user projects
-      axios.get('http://localhost:8000/api/projects',{_id:userObj.id})
+      axios.get('http://localhost:8000/api/projects', { _id: userObj.id })
         .then(({ data }) => {
-          console.log('Projects data:', data);  
+          console.log('Projects data:', data);
           if (data.success) {
             setProjects(data.projects);
           } else {
@@ -83,8 +83,18 @@ export default function Dashboard() {
       console.log('Project creation response:', data);
       if (data.success) {
         const projectId = data.project._id;
+        console.log("Fetching prompt...", prompt);
+        try {
+          const response = await axios.post("http://localhost:8000/api/prompt", {
+            prompt: prompt,
+            projectId: projectId
+          });
+          console.log("Fetched data:", response);
+        } catch (error) {
+          console.error("Error fetching prompt:", error);
+        }
         setPrompt('');
-        navigate('/chat', { state: { prompt, projectId } });
+        navigate('/chat', { state: { projectId } });
       } else {
         toast.error(data.message || 'Failed to create project');
       }
@@ -173,7 +183,7 @@ export default function Dashboard() {
                 <h4 className="font-semibold text-indigo-800">{proj.title}</h4>
                 <p className="text-sm text-gray-600 mt-2">Status: {proj.status}</p>
                 <button
-                  onClick={() => navigate(`/projects/${proj._id}`)}
+                  onClick={() => navigate(`/chat`, { state: { projectId: proj._id } })}
                   className="mt-4 w-full py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-medium"
                 >
                   Open

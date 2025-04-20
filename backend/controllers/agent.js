@@ -270,9 +270,9 @@ exports.prompt = async (req, res) => {
                     
                     // Update files
                     project.files = parsedFiles.map(file => ({
-                        name: file.filename,
-                        type: file.filepath.split('.').pop(),
-                        content: file.code,
+                        filename: file.filename,
+                        filepath: file.filepath,
+                        code: file.code,
                         updatedAt: new Date()
                     }));
                     
@@ -281,6 +281,12 @@ exports.prompt = async (req, res) => {
                     
                     await project.save();
                     console.log("[prompt] Project updated with initial files");
+
+                    return res.status(200).json({
+                        success: true,
+                        message: "Project initially created successfully",
+                        data: project
+                    });
                 } else {
                     console.log("[prompt] Project not found or not owned by user");
                 }
